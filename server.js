@@ -137,8 +137,11 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
   try {
     const form = new FormData();
     form.append("file", new Blob([req.file.buffer], { type: req.file.mimetype || "audio/webm" }), "speech.webm");
-    form.append("model", "whisper-1");
+    // gpt-4o-transcribe is markedly more accurate for Indian languages than whisper-1.
+    form.append("model", "gpt-4o-transcribe");
     form.append("language", "mr"); // Marathi
+    // A short context prompt nudges spelling/format and reduces mis-hearing.
+    form.append("prompt", "हे मराठी भाषेतील वाक्य आहे. कृपया अचूक मराठीत लिप्यंतर करा.");
 
     const r = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
