@@ -132,25 +132,33 @@ app.post("/api/tts", async (req, res) => {
 // ---------------------------------------------------------------------------
 // 3) TRANSCRIBE  — Marathi audio  ->  Whisper  ->  Marathi text
 // ---------------------------------------------------------------------------
+async function transcribeWith(model, buffer, mimetype) {
+  const form = new FormData();
+  form.append("file", new Blob([buffer], { type: mimetype || "audio/webm" }), "speech.webm");
+  form.append("model", model);
+  form.append("language", "mr"); // Marathi
+  form.append("prompt", "हे मराठी भाषेतील वाक्य आहे. कृपया अचूक मराठीत लिप्यंतर करा.");
+
+  const r = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+    method: "POST",
+    headers: { authorization: `Bearer ${OPENAI_API_KEY}` },
+    body: form,
+  });
+  const data = await r.json();
+  return { ok: r.ok, status: r.status, text: data?.text, error: data?.error?.message };
+}
+
 app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No audio uploaded." });
   try {
-    const form = new FormData();
-    form.append("file", new Blob([req.file.buffer], { type: req.file.mimetype || "audio/webm" }), "speech.webm");
-    // gpt-4o-transcribe is markedly more accurate for Indian languages than whisper-1.
-    form.append("model", "gpt-4o-transcribe");
-    form.append("language", "mr"); // Marathi
-    // A short context prompt nudges spelling/format and reduces mis-hearing.
-    form.append("prompt", "हे मराठी भाषेतील वाक्य आहे. कृपया अचूक मराठीत लिप्यंतर करा.");
-
-    const r = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-      method: "POST",
-      headers: { authorization: `Bearer ${OPENAI_API_KEY}` },
-      body: form,
-    });
-    const data = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error: data?.error?.message || "Whisper error" });
-    res.json({ text: data.text || "" });
+    // Prefer the more accurate model; fall back to whisper-1 if it isn't available.
+    let out = await transcribeWith("gpt-4o-transcribe", req.file.buffer, req.file.mimetype);
+    if (!out.ok) {
+      console.warn("gpt-4o-transcribe failed, falling back to whisper-1:", out.error);
+      out = await transcribeWith("whisper-1", req.file.buffer, req.file.mimetype);
+    }
+    if (!out.ok) return res.status(out.status || 500).json({ error: out.error || "Transcription failed" });
+    res.json({ text: out.text || "" });
   } catch (err) {
     console.error("transcribe:", err);
     res.status(500).json({ error: "Could not transcribe audio." });
