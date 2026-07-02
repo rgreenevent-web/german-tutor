@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>German tutor for Marathi speakers</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=Tiro+Devanagari+Marathi&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --paper:#FBF8F1; --card:#FFF; --ink:#1B2440; --ink-soft:#55607d;
+    --gold:#B8863B; --gold-soft:#f0e4cb; --teal:#256b64; --teal-soft:#e4f0ee;
+    --line:#e9e3d6; --shadow:0 1px 2px rgba(27,36,64,.05),0 8px 24px rgba(27,36,64,.06);
+  }
+  body { background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; line-height:1.5; padding:28px 18px 60px; }
+  .dev { font-family:'Tiro Devanagari Marathi',serif; }
+  .wrap { max-width:720px; margin:0 auto; }
+  .eyebrow { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:6px; }
+  h1 { font-family:'Fraunces',serif; font-weight:600; font-size:30px; line-height:1.1; }
+  .sub { color:var(--ink-soft); font-size:15px; margin-top:8px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:18px; margin:18px 0; }
+  .inputwrap { position:relative; }
+  textarea { width:100%; min-height:74px; resize:vertical; border:1px solid var(--line); border-radius:12px; padding:12px 54px 12px 14px; font-family:'Tiro Devanagari Marathi',serif; font-size:18px; color:var(--ink); background:#fffef9; outline:none; }
+  textarea:focus { border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
+  .mic { position:absolute; right:10px; bottom:10px; width:44px; height:44px; border-radius:50%; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:19px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); }
+  .mic:hover { border-color:var(--gold); }
+  .mic.rec { background:var(--teal); border-color:var(--teal); animation:pulse 1.3s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(37,107,100,.45)} 70%{box-shadow:0 0 0 12px rgba(37,107,100,0)} 100%{box-shadow:0 0 0 0 rgba(37,107,100,0)} }
+  .hint { font-size:13px; color:var(--teal); margin-top:8px; min-height:18px; }
+  .controls { margin-top:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  .seg { display:inline-flex; background:#f3efe4; border-radius:10px; padding:3px; }
+  .seg button { border:0; background:transparent; padding:7px 14px; border-radius:8px; font-size:13px; font-weight:500; color:var(--ink-soft); cursor:pointer; }
+  .seg button.on { background:#fff; color:var(--ink); box-shadow:var(--shadow); }
+  .btn { border:0; border-radius:11px; padding:11px 20px; cursor:pointer; font-size:14px; font-weight:600; background:var(--ink); color:#fff; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .err { color:#b23; font-size:14px; margin-top:10px; }
+  #out { display:none; }
+  .mr-src { font-size:15px; color:var(--ink-soft); margin-bottom:4px; }
+  .hero { background:linear-gradient(180deg,#fffdf7,#fff); border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:14px; padding:18px; margin:4px 0 16px; }
+  .de { font-family:'Fraunces',serif; font-weight:600; font-size:27px; line-height:1.2; }
+  .phon { font-size:20px; color:var(--teal); margin-top:8px; }
+  .speak { margin-top:14px; display:inline-flex; align-items:center; gap:8px; background:var(--teal); color:#fff; border:0; border-radius:999px; padding:9px 18px; font-weight:600; font-size:14px; cursor:pointer; }
+  .block { margin-top:16px; }
+  .label { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:6px; }
+  .grammar { font-size:15px; color:var(--ink-soft); }
+  table { width:100%; border-collapse:collapse; margin-top:4px; }
+  th,td { text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); font-size:15px; }
+  th { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); font-weight:600; }
+  td.g { font-family:'Fraunces',serif; font-weight:600; }
+  td.mr { font-family:'Tiro Devanagari Marathi',serif; color:var(--teal); }
+  .example { background:var(--teal-soft); border-radius:12px; padding:14px; margin-top:6px; }
+  .example .de-sm { font-family:'Fraunces',serif; font-weight:600; font-size:17px; }
+  .example .en-sm { font-size:14px; color:var(--ink-soft); margin-top:3px; }
+  .spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; display:inline-block; animation:spin .7s linear infinite; vertical-align:-2px; margin-right:8px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Marathi → German</div>
+  <h1>German tutor for Marathi speakers</h1>
+  <p class="sub">Speak or type in Marathi. Get natural German, Devanagari pronunciation, grammar, vocabulary — with native audio.</p>
+
+  <div class="panel">
+    <div class="inputwrap">
+      <textarea id="input" class="dev" placeholder="मराठीत लिहा किंवा माइक दाबून बोला…"></textarea>
+      <button class="mic" id="mic" title="Speak in Marathi">🎤</button>
+    </div>
+    <div id="hint" class="hint dev"></div>
+    <div class="controls">
+      <div class="seg" id="speed">
+        <button data-v="slow" class="on">Slow</button>
+        <button data-v="normal">Normal</button>
+      </div>
+      <button class="btn" id="go">Translate &amp; teach</button>
+    </div>
+    <div id="err" class="err"></div>
+  </div>
+
+  <div id="out" class="panel">
+    <div class="mr-src">You said: <span id="o-mr" class="dev"></span></div>
+    <div class="hero">
+      <div id="o-de" class="de"></div>
+      <div id="o-phon" class="phon dev"></div>
+      <button class="speak" id="o-speak">🔊 Hear it spoken</button>
+    </div>
+    <div class="block"><div class="label">English meaning</div><div id="o-en"></div></div>
+    <div class="block"><div class="label">Grammar tip</div><div id="o-grammar" class="grammar"></div></div>
+    <div class="block"><div class="label">Vocabulary</div>
+      <table><thead><tr><th>German</th><th>English</th><th>Marathi</th></tr></thead><tbody id="o-vocab"></tbody></table>
+    </div>
+    <div class="block"><div class="label">Try a similar sentence</div>
+      <div class="example"><div id="o-ex-de" class="de-sm"></div><div id="o-ex-en" class="en-sm"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let speed = "slow", currentGerman = "";
+
+$('speed').onclick = e => {
+  if (e.target.tagName !== 'BUTTON') return;
+  [...$('speed').children].forEach(b => b.classList.remove('on'));
+  e.target.classList.add('on'); speed = e.target.dataset.v;
+};
+
+// ---- Marathi voice input via MediaRecorder -> /api/transcribe (Whisper) ----
+let recorder, chunks = [], recording = false;
+$('mic').onclick = async () => {
+  if (recording) { recorder.stop(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      $('mic').classList.remove('rec'); $('mic').textContent = '🎤';
+      $('hint').textContent = 'लिप्यंतर करत आहे…';
+      const blob = new Blob(chunks, { type: 'audio/webm' });
+      const fd = new FormData(); fd.append('audio', blob, 'speech.webm');
+      try {
+        const r = await fetch('/api/transcribe', { method: 'POST', body: fd });
+        const d = await r.json();
+        if (d.text) $('input').value = (($('input').value.trim() + ' ') + d.text).trim();
+        $('hint').textContent = '';
+      } catch { $('hint').textContent = 'लिप्यंतर अयशस्वी.'; }
+    };
+    recorder.start(); recording = true;
+    $('mic').classList.add('rec'); $('mic').textContent = '⏹';
+    $('hint').textContent = 'ऐकत आहे… बोला, नंतर पुन्हा दाबा';
+    recorder.onstart = () => { recording = true; };
+    // flip flag on actual stop
+    const origStop = recorder.stop.bind(recorder);
+    recorder.stop = () => { recording = false; origStop(); };
+  } catch {
+    $('hint').textContent = 'माइक परवानगी हवी.';
+  }
+};
+
+// ---- Lesson ----
+async function run() {
+  const marathi = $('input').value.trim();
+  $('err').textContent = '';
+  if (!marathi) { $('err').textContent = 'Please speak or type a Marathi sentence.'; return; }
+  const btn = $('go'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Teaching…';
+  try {
+    const r = await fetch('/api/lesson', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ marathi })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Lesson failed');
+    render(d, marathi);
+  } catch (e) {
+    $('err').textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Translate & teach';
+  }
+}
+$('go').onclick = run;
+
+function render(d, marathi) {
+  $('o-mr').textContent = marathi;
+  $('o-de').textContent = d.german;
+  $('o-phon').textContent = d.phonetics || '';
+  $('o-en').textContent = d.english || '';
+  $('o-grammar').textContent = d.grammar || '';
+  $('o-ex-de').textContent = d.example?.german || '';
+  $('o-ex-en').textContent = d.example?.english || '';
+  const tb = $('o-vocab'); tb.innerHTML = '';
+  (d.vocab || []).forEach(v => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="g">${v.german}</td><td>${v.english}</td><td class="mr">${v.marathi}</td>`;
+    tb.appendChild(tr);
+  });
+  currentGerman = d.german;
+  $('out').style.display = 'block';
+  playAudio();
+}
+
+// ---- German audio via /api/tts (ElevenLabs) ----
+async function playAudio() {
+  if (!currentGerman) return;
+  const btn = $('o-speak'); btn.textContent = '⏳ Loading…';
+  try {
+    const r = await fetch('/api/tts', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ german: currentGerman, speed })
+    });
+    if (!r.ok) throw new Error();
+    const blob = await r.blob();
+    new Audio(URL.createObjectURL(blob)).play();
+  } catch { /* silent */ }
+  finally { btn.textContent = '🔊 Hear it spoken'; }
+}
+$('o-speak').onclick = playAudio;
+</script>
+</body>
+</html>
